@@ -18,6 +18,18 @@ const Token = union(enum) {
     MUL,
     DIV,
     ASSIGN,
+    LET,
+    FUNCTION,
+
+    fn is_keyword(word: []const u8) ?Token {
+        if (std.mem.eql(u8, word, "let")) {
+            return .LET;
+        }
+        if (std.mem.eql(u8, word, "fn")) {
+            return .FUNCTION;
+        }
+        return null;
+    }
 };
 
 const Lexer = struct {
@@ -52,7 +64,7 @@ fn read_char(lexer: *Lexer) void {
 
 fn parse_identifier(lexer: *Lexer) []const u8 {
     var start = lexer.position;
-    while (alpha.isAlphaNum(lexer.char)) {
+    while (alpha.is_alpha_num(lexer.char)) {
         read_char(lexer);
     }
     return lexer.input[start..lexer.position];
@@ -60,14 +72,14 @@ fn parse_identifier(lexer: *Lexer) []const u8 {
 
 fn parse_number(lexer: *Lexer) []const u8 {
     var start = lexer.position;
-    while (alpha.isDigit(lexer.char)) {
+    while (alpha.is_digit(lexer.char)) {
         read_char(lexer);
     }
     return lexer.input[start..lexer.position];
 }
 
 fn eat_whitespace(lexer: *Lexer) void {
-    while (alpha.isWhitespace(lexer.char)) {
+    while (alpha.is_whitespace(lexer.char)) {
         read_char(lexer);
     }
 }
@@ -90,11 +102,15 @@ fn next_token(lexer: *Lexer) Token {
         '=' => .ASSIGN,
 
         else => blk: {
-            if (alpha.isDigit(char)) {
+            if (alpha.is_digit(char)) {
                 return .{ .NUMBER = parse_number(lexer) };
             }
-            if (alpha.isAlphaNum(char)) {
-                return .{ .IDENTIFIER = parse_identifier(lexer) };
+            if (alpha.is_alpha_num(char)) {
+                const identifier = parse_identifier(lexer);
+                if (Token.is_keyword(identifier)) |keyword| {
+                    return keyword;
+                }
+                return .{ .IDENTIFIER = identifier };
             }
 
             break :blk .ILLEGAL;
@@ -150,22 +166,40 @@ test "[Lexer] simple code" {
     const expectEqualDeep = std.testing.expectEqualDeep;
 
     var code =
-        \\test = 5;
-        \\test2 = 2 + 4;
+        \\ let test = 5;
+        \\ let test2 = 2 + 4;
+        \\
+        \\ fn demo() {
+        \\   2 + 3;
+        \\}
     ;
     var lexer = Lexer.from_input(code);
 
     var tokens = [_]Token{
+        .LET,
         .{ .IDENTIFIER = "test" },
         .ASSIGN,
         .{ .NUMBER = "5" },
         .SEMICOLUMN,
+
+        .LET,
         .{ .IDENTIFIER = "test2" },
         .ASSIGN,
         .{ .NUMBER = "2" },
         .ADD,
         .{ .NUMBER = "4" },
         .SEMICOLUMN,
+
+        .FUNCTION,
+        .{ .IDENTIFIER = "demo" },
+        .LPARENTHESIS,
+        .RPARENTHESIS,
+        .LSQUAREBRACE,
+        .{ .NUMBER = "2" },
+        .ADD,
+        .{ .NUMBER = "3" },
+        .SEMICOLUMN,
+        .RSQUAREBRACE,
         .EOF,
     };
     for (tokens) |token| {
