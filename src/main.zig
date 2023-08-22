@@ -6,20 +6,20 @@ const Token = @import("./lexer.zig").Token;
 
 pub fn main() !void {
     // std lib
-    std.log.debug("OS = {}", .{builtin.target.os.tag});
-    std.log.debug("Builtin = {}", .{builtin.target.os.getVersionRange()});
-    std.log.debug("Time = {}", .{std.time.milliTimestamp()});
-
-    // HashMap + heap
-    var map = std.StringHashMap([]const u8).init(std.heap.page_allocator);
-    defer map.deinit();
-    try map.put("coucou", "world");
-    std.log.debug("{any}\n", .{map});
-
-    // Variables
-    const a = 32;
-    var b = "coucou";
-    std.debug.print(">> {} {s} {s}\n", .{ a, b, map.get("coucou").? });
+    //std.log.debug("OS = {}", .{builtin.target.os.tag});
+    //std.log.debug("Builtin = {}", .{builtin.target.os.getVersionRange()});
+    //std.log.debug("Time = {}", .{std.time.milliTimestamp()});
+    //
+    //// HashMap + heap
+    //var map = std.StringHashMap([]const u8).init(std.heap.page_allocator);
+    //defer map.deinit();
+    //try map.put("coucou", "world");
+    //std.log.debug("{any}\n", .{map});
+    //
+    //// Variables
+    //const a = 32;
+    //var b = "coucou";
+    //std.debug.print(">> {} {s} {s}\n", .{ a, b, map.get("coucou").? });
 
     // Lexer
     var lexer = Lexer.from_input(
@@ -41,4 +41,8 @@ test "simple test" {
     try list.append(42);
 
     try std.testing.expectEqual(@as(i32, 42), list.pop());
+}
+
+test {
+    @import("std").testing.refAllDecls(@This());
 }

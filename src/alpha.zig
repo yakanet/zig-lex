@@ -1,22 +1,22 @@
 const assert = @import("std").testing;
 
 /// Return true if the value is between '0' and '9'
-pub fn is_digit(value: u8) bool {
+pub fn isDigit(value: u8) bool {
     return switch (value) {
         '0'...'9' => true,
         else => false,
     };
 }
 
-test "is_digit" {
-    try assert.expect(is_digit('0'));
-    try assert.expect(is_digit('1'));
-    try assert.expect(is_digit('9'));
-    try assert.expect(!is_digit('a'));
+test "isDigit" {
+    try assert.expect(isDigit('0'));
+    try assert.expect(isDigit('1'));
+    try assert.expect(isDigit('9'));
+    try assert.expect(!isDigit('a'));
 }
 
 /// Return true if the value is between 'a' and 'z' (lower, upper) or is a '_'
-pub fn is_alpha(value: u8) bool {
+pub fn isAlpha(value: u8) bool {
     return switch (value) {
         'a'...'z' => true,
         'A'...'Z' => true,
@@ -25,31 +25,31 @@ pub fn is_alpha(value: u8) bool {
     };
 }
 
-test "is_alpha" {
-    try assert.expect(is_alpha('a'));
-    try assert.expect(is_alpha('_'));
-    try assert.expect(is_alpha('z'));
-    try assert.expect(!is_alpha('2'));
+test "isAlpha" {
+    try assert.expect(isAlpha('a'));
+    try assert.expect(isAlpha('_'));
+    try assert.expect(isAlpha('z'));
+    try assert.expect(!isAlpha('2'));
 }
 
-pub fn is_alpha_num(value: u8) bool {
-    return is_digit(value) or is_alpha(value);
+pub fn isAlphaNum(value: u8) bool {
+    return isDigit(value) or isAlpha(value);
 }
 
 /// List of whitespace characters
 const whitespace = [_]u8{ ' ', '\t', '\n', '\r' };
 
 /// Return true if the value is a whitespace character
-pub fn is_whitespace(value: u8) bool {
+pub fn isWhitespace(value: u8) bool {
     return inline for (whitespace) |w| {
         if (value == w)
             break true;
     } else false;
 }
 
-test "is_whitespace" {
-    try assert.expect(is_whitespace(' '));
-    try assert.expect(is_whitespace('\t'));
-    try assert.expect(is_whitespace('\r'));
-    try assert.expect(!is_whitespace('a'));
+test "isWhitespace" {
+    try assert.expect(isWhitespace(' '));
+    try assert.expect(isWhitespace('\t'));
+    try assert.expect(isWhitespace('\r'));
+    try assert.expect(!isWhitespace('a'));
 }

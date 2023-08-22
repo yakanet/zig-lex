@@ -26,7 +26,7 @@ pub const Token = struct {
     identifier: []const u8 = undefined,
 };
 
-fn is_keyword(word: []const u8) ?TokenType {
+fn isKeyword(word: []const u8) ?TokenType {
     if (std.mem.eql(u8, word, "let")) {
         return .LET;
     }
@@ -44,18 +44,18 @@ pub const Lexer = struct {
     position: usize,
     input: []const u8,
 
-    pub fn from_input(input: []const u8) Lexer {
+    pub fn fromInput(input: []const u8) Lexer {
         var lexer = Lexer{
             .input = input,
             .char = 0,
             .position = 0,
             .read_position = 0,
         };
-        lexer.read_char();
+        lexer.readChar();
         return lexer;
     }
 
-    fn read_char(self: *Lexer) void {
+    fn readChar(self: *Lexer) void {
         if (self.read_position >= self.input.len) {
             self.char = 0;
         } else {
@@ -65,52 +65,52 @@ pub const Lexer = struct {
         self.read_position += 1;
     }
 
-    fn parse_identifier(self: *Lexer) []const u8 {
+    fn parseIdentifier(self: *Lexer) []const u8 {
         var start = self.position;
-        while (alpha.is_alpha_num(self.char)) {
-            self.read_char();
+        while (alpha.isAlphaNum(self.char)) {
+            self.readChar();
         }
         return self.input[start..self.position];
     }
 
-    fn parse_number(self: *Lexer) []const u8 {
+    fn parseNumber(self: *Lexer) []const u8 {
         var start = self.position;
-        while (alpha.is_digit(self.char)) {
-            self.read_char();
+        while (alpha.isDigit(self.char)) {
+            self.readChar();
         }
         return self.input[start..self.position];
     }
 
-    fn eat_whitespace(self: *Lexer) void {
-        while (alpha.is_whitespace(self.char)) {
-            self.read_char();
+    fn eatWhitespace(self: *Lexer) void {
+        while (alpha.isWhitespace(self.char)) {
+            self.readChar();
         }
     }
 
-    pub fn next_token(self: *Lexer) ?Token {
-        self.eat_whitespace();
+    pub fn nextToken(self: *Lexer) ?Token {
+        self.eatWhitespace();
         const char = self.char;
         const token: Token = switch (char) {
             0 => return null,
-            '(' => .{ .token = .LPARENTHESIS },
-            ')' => .{ .token = .RPARENTHESIS },
-            '{' => .{ .token = .LSQUAREBRACE },
-            '}' => .{ .token = .RSQUAREBRACE },
-            ',' => .{ .token = .COMMA },
-            ';' => .{ .token = .SEMICOLUMN },
-            '+' => .{ .token = .ADD },
-            '-' => .{ .token = .SUB },
-            '*' => .{ .token = .MUL },
-            '/' => .{ .token = .DIV },
-            '=' => .{ .token = .ASSIGN },
+            '(' => .{ .token = .LPARENTHESIS, .identifier = "(" },
+            ')' => .{ .token = .RPARENTHESIS, .identifier = ")" },
+            '{' => .{ .token = .LSQUAREBRACE, .identifier = "{" },
+            '}' => .{ .token = .RSQUAREBRACE, .identifier = "}" },
+            ',' => .{ .token = .COMMA, .identifier = "," },
+            ';' => .{ .token = .SEMICOLUMN, .identifier = ";" },
+            '+' => .{ .token = .ADD, .identifier = "+" },
+            '-' => .{ .token = .SUB, .identifier = "-" },
+            '*' => .{ .token = .MUL, .identifier = "*" },
+            '/' => .{ .token = .DIV, .identifier = "/" },
+            '=' => .{ .token = .ASSIGN, .identifier = "=" },
 
             else => blk: {
-                if (alpha.is_digit(char)) {
-                    return .{ .token = .NUMBER, .identifier = self.parse_number() };
+                if (alpha.isDigit(char)) {
+                    return .{ .token = .NUMBER, .identifier = self.parseNumber() };
                 }
-                if (alpha.is_alpha_num(char)) {
-                    const identifier = self.parse_identifier();
-                    if (is_keyword(identifier)) |keyword| {
+                if (alpha.isAlphaNum(char)) {
+                    const identifier = self.parseIdentifier();
+                    if (isKeyword(identifier)) |keyword| {
                         return .{ .token = keyword, .identifier = identifier };
                     }
                     return .{ .token = .IDENTIFIER, .identifier = identifier };
@@ -119,30 +119,30 @@ pub const Lexer = struct {
                 break :blk .{ .token = .ILLEGAL, .identifier = &[_]u8{} };
             },
         };
-        self.read_char();
+        self.readChar();
         return token;
     }
 };
 
 test "[Lexer] simple chars" {
     const expectEqualDeep = std.testing.expectEqualDeep;
-    var lexer = Lexer.from_input("(){};,+-*/=");
+    var lexer = Lexer.fromInput("(){};,+-*/=");
     const tokens = [_]Token{
-        .{ .token = .LPARENTHESIS },
-        .{ .token = .RPARENTHESIS },
-        .{ .token = .LSQUAREBRACE },
-        .{ .token = .RSQUAREBRACE },
-        .{ .token = .SEMICOLUMN },
-        .{ .token = .COMMA },
-        .{ .token = .ADD },
-        .{ .token = .SUB },
-        .{ .token = .MUL },
-        .{ .token = .DIV },
-        .{ .token = .ASSIGN },
+        .{ .token = .LPARENTHESIS, .identifier = "(" },
+        .{ .token = .RPARENTHESIS, .identifier = ")" },
+        .{ .token = .LSQUAREBRACE, .identifier = "{" },
+        .{ .token = .RSQUAREBRACE, .identifier = "}" },
+        .{ .token = .SEMICOLUMN, .identifier = ";" },
+        .{ .token = .COMMA, .identifier = "," },
+        .{ .token = .ADD, .identifier = "+" },
+        .{ .token = .SUB, .identifier = "-" },
+        .{ .token = .MUL, .identifier = "*" },
+        .{ .token = .DIV, .identifier = "/" },
+        .{ .token = .ASSIGN, .identifier = "=" },
     };
 
     for (tokens) |token| {
-        const actual = lexer.next_token().?;
+        const actual = lexer.nextToken().?;
         try expectEqualDeep(token, actual);
     }
 }
@@ -158,35 +158,37 @@ test "[Lexer] simple code" {
         \\   2 + 3;
         \\}
     ;
-    var lexer = Lexer.from_input(code);
+    var lexer = Lexer.fromInput(code);
 
     var tokens = [_]Token{
         .{ .token = .LET, .identifier = "let" },
         .{ .token = .IDENTIFIER, .identifier = "test" },
-        .{ .token = .ASSIGN },
+        .{ .token = .ASSIGN, .identifier = "=" },
         .{ .token = .NUMBER, .identifier = "5" },
-        .{ .token = .SEMICOLUMN },
+        .{ .token = .SEMICOLUMN, .identifier = ";" },
 
         .{ .token = .LET, .identifier = "let" },
         .{ .token = .IDENTIFIER, .identifier = "test2" },
-        .{ .token = .ASSIGN },
+        .{ .token = .ASSIGN, .identifier = "=" },
         .{ .token = .NUMBER, .identifier = "2" },
-        .{ .token = .ADD },
+        .{ .token = .ADD, .identifier = "+" },
         .{ .token = .NUMBER, .identifier = "4" },
-        .{ .token = .SEMICOLUMN },
+        .{ .token = .SEMICOLUMN, .identifier = ";" },
 
         .{ .token = .FUNCTION, .identifier = "fn" },
         .{ .token = .IDENTIFIER, .identifier = "demo" },
-        .{ .token = .LPARENTHESIS },
-        .{ .token = .RPARENTHESIS },
-        .{ .token = .LSQUAREBRACE },
+        .{ .token = .LPARENTHESIS, .identifier = "(" },
+        .{ .token = .RPARENTHESIS, .identifier = ")" },
+        .{ .token = .LSQUAREBRACE, .identifier = "{" },
         .{ .token = .NUMBER, .identifier = "2" },
-        .{ .token = .ADD },
+        .{ .token = .ADD, .identifier = "+" },
         .{ .token = .NUMBER, .identifier = "3" },
-        .{ .token = .SEMICOLUMN },
-        .{ .token = .RSQUAREBRACE },
+        .{ .token = .SEMICOLUMN, .identifier = ";" },
+        .{ .token = .RSQUAREBRACE, .identifier = "}" },
     };
+    _ = std.log.defaultLogEnabled(std.log.Level.debug);
     for (tokens) |token| {
-        try expectEqualDeep(token, lexer.next_token().?);
+        std.log.debug("{}\n", .{token});
+        try expectEqualDeep(token, lexer.nextToken().?);
     }
 }
