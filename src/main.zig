@@ -22,7 +22,7 @@ pub fn main() !void {
     //std.debug.print(">> {} {s} {s}\n", .{ a, b, map.get("coucou").? });
 
     // Lexer
-    var lexer = Lexer.from_input(
+    var lexer = Lexer.fromInput(
         \\ let test = 5;
         \\ let test2 = 2 + 4;
         \\
@@ -30,7 +30,7 @@ pub fn main() !void {
         \\   2 + 3;
         \\}
     );
-    while (lexer.next_token()) |token| {
+    while (lexer.nextToken()) |token| {
         std.log.info("{any}", .{token});
     }
 }
