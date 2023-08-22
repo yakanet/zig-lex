@@ -23,7 +23,7 @@ pub const TokenType = enum {
 
 pub const Token = struct {
     token: TokenType,
-    identifier: []const u8 = undefined,
+    identifier: []const u8,
 };
 
 fn isKeyword(word: []const u8) ?TokenType {

@@ -5,10 +5,12 @@ const Lexer = @import("./lexer.zig").Lexer;
 const Token = @import("./lexer.zig").Token;
 
 pub fn main() !void {
+    const out = std.io.getStdOut().writer();
+
     // std lib
-    //std.log.debug("OS = {}", .{builtin.target.os.tag});
-    //std.log.debug("Builtin = {}", .{builtin.target.os.getVersionRange()});
-    //std.log.debug("Time = {}", .{std.time.milliTimestamp()});
+    try out.print("OS = {s}\n", .{@tagName(builtin.target.os.tag)});
+    try out.print("Builtin = {}\n", .{builtin.target.os.getVersionRange()});
+    try out.print("Time = {}\n", .{std.time.milliTimestamp()});
     //
     //// HashMap + heap
     //var map = std.StringHashMap([]const u8).init(std.heap.page_allocator);
@@ -31,7 +33,7 @@ pub fn main() !void {
         \\}
     );
     while (lexer.nextToken()) |token| {
-        std.log.info("{any}", .{token});
+        try out.print("{any}\n", .{token});
     }
 }
 
