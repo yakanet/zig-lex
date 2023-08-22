@@ -1,17 +1,30 @@
 pub fn is_digit(value: u8) bool {
-    return value >= '0' and value <= '9';
+    return switch (value) {
+        '0'...'9' => true,
+        else => false,
+    };
 }
 
 pub fn is_alpha(value: u8) bool {
-    return (value >= 'a' and value <= 'z') or (value >= 'A' and value <= 'Z') or value == '_';
+    return switch (value) {
+        'a'...'z' => true,
+        'A'...'Z' => true,
+        '_' => true,
+        else => false,
+    };
 }
 
 pub fn is_alpha_num(value: u8) bool {
     return is_digit(value) or is_alpha(value);
 }
 
+const whitespace = [_]u8{ ' ', '\t', '\n', '\r' };
+
 pub fn is_whitespace(value: u8) bool {
-    return value == ' ' or value == '\t' or value == '\n' or value == '\r';
+    return inline for (whitespace) |w| {
+        if (value == w)
+            break true;
+    } else false;
 }
 
 const assert = @import("std").testing;
@@ -28,7 +41,6 @@ test "Is alpha" {
     try assert.expect(is_alpha('z'));
     try assert.expect(!is_alpha('2'));
 }
-
 
 test "Is whitespace" {
     try assert.expect(is_whitespace(' '));
